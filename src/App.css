@@ -1,7 +1,9 @@
 .app {
   min-height: 100vh;
-  background: #000;
+  background: radial-gradient(#885656, #222222);
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
