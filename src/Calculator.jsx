@@ -1,31 +1,32 @@
-import React, { useState } from 'react';
-import './Calculator.css';
+import React, { useState } from "react";
+import "./Calculator.css";
+import { evaluate } from "mathjs";
 
 const Calculator = () => {
-  const [expression, setExpression] = useState('');
-  const [result, setResult] = useState('');
+  const [expression, setExpression] = useState("");
+  const [result, setResult] = useState("");
   const [ansUsed, setAnsUsed] = useState(false);
 
-  const isOperator = (val) => ['+', '-', '×', '÷', '%'].includes(val);
+  const isOperator = (val) => ["+", "-", "×", "÷", "%"].includes(val);
   const sanitize = (exp) =>
-    exp.replace(/×/g, '*').replace(/÷/g, '/').replace(/%/g, '%');
+    exp.replace(/×/g, "*").replace(/÷/g, "/").replace(/%/g, "%");
 
   const handleClick = (value) => {
     const lastChar = expression.slice(-1);
 
     // AC = Clear
-    if (value === 'AC') {
-      setExpression('');
-      setResult('');
+    if (value === "AC") {
+      setExpression("");
+      setResult("");
       setAnsUsed(false);
       return;
     }
 
     // Backspace
-    if (value === '⌫') {
+    if (value === "⌫") {
       if (ansUsed) {
-        setExpression('');
-        setResult('');
+        setExpression("");
+        setResult("");
         setAnsUsed(false);
       } else {
         setExpression(expression.slice(0, -1));
@@ -34,30 +35,36 @@ const Calculator = () => {
     }
 
     // Equal
-    if (value === '=') {
+    if (value === "=") {
       try {
-        let evalExpr = sanitize(expression || '0');
+        let evalExpr = sanitize(expression || "0");
         const last = evalExpr.slice(-1);
-        if (['+', '-', '*', '/', '%'].includes(last)) {
+        if (["+", "-", "*", "/", "%"].includes(last)) {
           const match = evalExpr.match(/([+\-*/%])([^+\-*/%]+)$/);
-          evalExpr += match?.[2] || '0';
+          evalExpr += match?.[2] || "0";
         }
 
-        const evaluated = Function(`return ${evalExpr}`)();
-        setResult(String(evaluated));
+        const evaluated = evaluate(evalExpr);
+
+        if (!isFinite(evaluated)) {
+          setResult("undefined");
+        } else {
+          setResult(String(evaluated));
+        }
+
         setAnsUsed(true);
       } catch {
-        setResult('Error');
+        setResult("Error");
         setAnsUsed(false);
       }
       return;
     }
 
     // ± (toggle sign)
-    if (value === '±') {
+    if (value === "±") {
       if (ansUsed) {
         setExpression(String(-parseFloat(result)));
-        setResult('');
+        setResult("");
         setAnsUsed(false);
         return;
       }
@@ -72,30 +79,30 @@ const Calculator = () => {
     }
 
     // √
-    if (value === '√') {
+    if (value === "√") {
       try {
-        const val = parseFloat(expression || '0');
+        const val = parseFloat(expression || "0");
         setResult(Math.sqrt(val).toString());
         setAnsUsed(true);
       } catch {
-        setResult('Error');
+        setResult("Error");
         setAnsUsed(false);
       }
       return;
     }
 
     // . (dot)
-    if (value === '.') {
-      if (expression === '') {
-        setExpression('0.');
+    if (value === ".") {
+      if (expression === "") {
+        setExpression("0.");
         return;
       }
 
-      const parts = expression.split(/[\+\-\×\÷\%]/);
+      const parts = expression.split(/[+\-×÷%]/);
       const lastPart = parts[parts.length - 1];
-      if (lastPart.includes('.')) return;
+      if (lastPart.includes(".")) return;
 
-      setExpression(expression + '.');
+      setExpression(expression + ".");
       return;
     }
 
@@ -106,15 +113,15 @@ const Calculator = () => {
       } else {
         setExpression(value);
       }
-      setResult('');
+      setResult("");
       setAnsUsed(false);
       return;
     }
 
     // First input
-    if (expression === '') {
-      if (value === '-') return setExpression('-');
-      if (isOperator(value)) return setExpression('0' + value);
+    if (expression === "") {
+      if (value === "-") return setExpression("-");
+      if (isOperator(value)) return setExpression("0" + value);
       return setExpression(value);
     }
 
@@ -126,38 +133,38 @@ const Calculator = () => {
 
     // Prevent leading zero like 023
     if (/[0-9]/.test(value)) {
-      const parts = expression.split(/([\+\-\×\÷\%])/);
+      const parts = expression.split(/([+\-×÷%])/);
       const last = parts[parts.length - 1];
 
-      if (last === '0') {
+      if (last === "0") {
         parts[parts.length - 1] = value;
-        setExpression(parts.join(''));
+        setExpression(parts.join(""));
         return;
       }
 
       if (/^0[0-9]+$/.test(last)) {
-        parts[parts.length - 1] = last.replace(/^0+/, '') + value;
-        setExpression(parts.join(''));
+        parts[parts.length - 1] = last.replace(/^0+/, "") + value;
+        setExpression(parts.join(""));
         return;
       }
     }
 
     setExpression(expression + value);
-    setResult('');
+    setResult("");
   };
 
   const buttons = [
-    ['AC', '⌫', '±', '÷'],
-    ['7', '8', '9', '×'],
-    ['4', '5', '6', '-'],
-    ['1', '2', '3', '+'],
-    ['√', '0', '.', '=', '%'],
+    ["AC", "⌫", "±", "÷"],
+    ["7", "8", "9", "×"],
+    ["4", "5", "6", "-"],
+    ["1", "2", "3", "+"],
+    ["√", "0", ".", "=", "%"],
   ];
 
   return (
     <div className="calculator">
       <div className="display">
-        <div className="expression">{expression || '0'}</div>
+        <div className="expression">{expression || "0"}</div>
         <div className="result">{result}</div>
       </div>
       <div className="buttons">
